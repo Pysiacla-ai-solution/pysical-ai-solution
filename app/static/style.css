@@ -1,0 +1,378 @@
+:root{
+  --bg:#0b1020;
+  --panel:#121a33;
+  --card:#0f1730;
+  --text:#e8ecff;
+  --muted:#a9b2d6;
+  --line:rgba(255,255,255,.10);
+  --accent:#7aa7ff;
+  --accent2:#7cffc6;
+}
+
+*{box-sizing:border-box}
+html, body{height:100%}
+
+body{
+  margin:0;
+  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Noto Sans KR", Arial;
+  background: radial-gradient(1200px 700px at 20% 0%, rgba(122,167,255,.18), transparent 60%),
+              radial-gradient(1200px 700px at 90% 10%, rgba(124,255,198,.12), transparent 55%),
+              var(--bg);
+  color:var(--text);
+
+  /* ✅ 페이지 자체 스크롤 방지(채팅/패널 내부만 스크롤) */
+  overflow:hidden;
+}
+
+a{color:inherit; text-decoration:none}
+
+/* ✅ 화면을 꽉 채우는 레이아웃(Topbar + Grid) */
+.container{
+  max-width:1100px;
+  margin:0 auto;
+  padding:24px;
+
+  height:100vh;
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+}
+
+/* ===== Topbar ===== */
+.topbar{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+
+  padding:14px 18px;
+  border:1px solid var(--line);
+  border-radius:16px;
+
+  background: linear-gradient(180deg, rgba(18,26,51,.9), rgba(15,23,48,.85));
+  backdrop-filter: blur(10px);
+
+  flex:0 0 auto;
+}
+
+.brand{display:flex; gap:12px; align-items:center}
+.logo{
+  width:36px; height:36px; border-radius:12px;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+}
+.brand h1{font-size:16px; margin:0}
+.brand p{margin:0; font-size:12px; color:var(--muted)}
+
+.nav{display:flex; gap:10px; flex-wrap:wrap;}
+.nav a{
+  padding:8px 10px;
+  border:1px solid var(--line);
+  border-radius:12px;
+  font-size:13px;
+  color:var(--muted);
+}
+.nav a.active{
+  color:var(--text);
+  border-color: rgba(122,167,255,.55);
+  background: rgba(122,167,255,.10);
+}
+
+/* ===== Grid ===== */
+.grid{
+  display:grid;
+  grid-template-columns: 320px 1fr;
+  gap:14px;
+  margin-top:14px;
+
+  flex:1;
+  min-height:0; /* ✅ 내부 스크롤 핵심 */
+  height:auto;
+  align-items:stretch;
+}
+
+/* ===== Panel (Left) ===== */
+.panel{
+  border:1px solid var(--line);
+  border-radius:16px;
+  background: rgba(18,26,51,.72);
+  padding:14px;
+
+  height:100%;
+  min-height:0;
+  overflow:auto; /* ✅ 패널 내용 많으면 패널 내부 스크롤 */
+}
+
+.panel h2{margin:0 0 8px 0; font-size:14px}
+.help{color:var(--muted); font-size:12px; line-height:1.5}
+
+.field{margin-top:10px}
+label{display:block; font-size:12px; color:var(--muted); margin-bottom:6px}
+
+input, textarea, select{
+  width:100%;
+  padding:10px 12px;
+  border-radius:12px;
+  border:1px solid var(--line);
+  background: rgba(15,23,48,.7);
+  color:var(--text);
+  outline:none;
+}
+
+textarea{
+  min-height:110px;
+  resize:vertical; /* ✅ 왼쪽 패널 textarea는 늘려도 패널 내부 스크롤이라 OK */
+}
+
+.btnrow{
+  display:flex;
+  gap:10px;
+  margin-top:10px;
+  flex-wrap:wrap;
+}
+
+button{
+  padding:10px 12px;
+  border-radius:12px;
+  border:1px solid var(--line);
+  background: rgba(122,167,255,.14);
+  color:var(--text);
+  cursor:pointer;
+}
+button.secondary{background: rgba(255,255,255,.06)}
+button:disabled{opacity:.6; cursor:not-allowed}
+
+/* ✅ chatHeader 오른쪽에 작은 버튼 넣을 때 */
+.chatActions{
+  display:flex;
+  gap:8px;
+  align-items:center;
+}
+button.sm{
+  padding:8px 10px;
+  font-size:12px;
+  border-radius:12px;
+}
+
+/* ===== Chat (Right) ===== */
+.chat{
+  border:1px solid var(--line);
+  border-radius:16px;
+  background: rgba(18,26,51,.55);
+  overflow:hidden;
+
+  display:flex;
+  flex-direction:column;
+
+  height:100%;
+  min-height:0;
+}
+
+/* 상단 고정 */
+.chatHeader{
+  padding:12px 14px;
+  border-bottom:1px solid var(--line);
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  flex:0 0 auto;
+}
+
+.badge{
+  font-size:12px; color:var(--muted);
+  padding:6px 10px;
+  border-radius:999px;
+  border:1px solid var(--line);
+  background: rgba(255,255,255,.05);
+}
+
+/* ✅ 메시지만 스크롤 */
+.messages{
+  padding:14px;
+  flex:1;
+  min-height:0;
+  overflow-y:auto;
+
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+
+.msg{
+  max-width:92%;
+  padding:10px 12px;
+  border-radius:14px;
+  border:1px solid var(--line);
+  background: rgba(15,23,48,.7);
+  line-height:1.45;
+  font-size:13px;
+  overflow-wrap:anywhere; /* ✅ 긴 텍스트가 레이아웃 밀지 않게 */
+}
+.msg.user{
+  align-self:flex-end;
+  background: rgba(122,167,255,.12);
+  border-color: rgba(122,167,255,.28);
+}
+.msg.assistant{align-self:flex-start}
+.msg .meta{margin-top:8px; color:var(--muted); font-size:12px}
+
+/* ✅ 입력 영역 고정 + 입력창 절대 안 늘어남 */
+.composer{
+  padding:12px;
+  border-top:1px solid var(--line);
+  display:flex;
+  gap:10px;
+  flex:0 0 auto;
+}
+
+.composer textarea{
+  height:84px;
+  min-height:84px;
+  max-height:84px;
+  overflow-y:auto;
+  resize:none; /* ✅ 입력창 늘어나는 것 차단 */
+}
+
+.composer button{min-width:110px}
+
+/* ===== Sources / Code blocks ===== */
+.sources{
+  margin-top:10px;
+  border-top:1px dashed var(--line);
+  padding-top:10px;
+  color:var(--muted);
+  font-size:12px;
+}
+.sources ul{margin:6px 0 0 18px; padding:0}
+
+.code{
+  margin-top:10px;
+  padding:10px 12px;
+  border-radius:12px;
+  border:1px solid var(--line);
+  background: rgba(0,0,0,.22);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size:12px;
+  white-space:pre-wrap;
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 980px){
+  body{overflow:auto;}            /* 모바일은 페이지 스크롤 허용이 더 안정적 */
+  .container{height:auto; min-height:100vh; overflow:visible;}
+  .grid{
+    grid-template-columns: 1fr;
+    min-height:unset;
+  }
+  .panel{height:auto}
+  .chat{height:auto; min-height:520px}
+}
+
+
+/* ====== spec 페이지 보완 ====== */
+
+.hint{
+  display:inline-block;
+  margin-top:6px;
+  color: rgba(169,178,214,.85);
+  font-size:12px;
+}
+
+/* chat header 오른쪽 액션 */
+.chatActions{
+  display:flex;
+  gap:8px;
+  align-items:center;
+}
+
+/* 작은 버튼(대화 초기화용) */
+button.sm{
+  padding:7px 10px;
+  border-radius:999px;
+  font-size:12px;
+  min-width:auto;
+}
+
+/* 선택 입력 접기/펼치기 */
+.detailsBox{
+  margin-top:12px;
+  border:1px solid var(--line);
+  border-radius:14px;
+  background: rgba(15,23,48,.35);
+  padding:10px 12px;
+}
+
+.detailsBox summary{
+  cursor:pointer;
+  user-select:none;
+  font-size:12px;
+  color: var(--text);
+  list-style:none;
+}
+
+.detailsBox summary::-webkit-details-marker{ display:none; }
+
+.detailsBox[open] summary{
+  margin-bottom:10px;
+  color: rgba(232,236,255,.92);
+}
+
+input::placeholder,
+textarea::placeholder{
+  color: rgba(169,178,214,.55);
+}
+/* 로봇 정보(선택) summary 글꼴/마커 정리 */
+details.robotInfo summary{
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  line-height: 1.2;
+
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  padding: 10px 12px;
+  margin: 10px 0 12px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: rgba(255,255,255,.04);
+
+  list-style: none;          /* 기본 마커 제거 */
+  cursor: default;
+}
+
+/* 기본 삼각형(브라우저 마커) 제거 */
+details.robotInfo summary::-webkit-details-marker{ display:none; }
+details.robotInfo summary::marker{ content:""; }
+
+/* 커스텀 화살표 */
+details.robotInfo summary::before{
+  content: "▾";
+  color: var(--muted);
+  display: inline-block;
+  transform: rotate(-90deg); /* 닫힘 상태 */
+}
+details.robotInfo[open] summary::before{
+  transform: rotate(0deg);   /* 열림 상태 */
+}
+
+.robotInfo{ margin-top:14px; }
+.robotInfoTitle{
+  font-size:13px;
+  font-weight:600;
+  color:var(--text);
+  margin:0;
+}
+.hint { color: var(--muted); font-size:12px; }
+
+.chatActions { display:flex; gap:8px; }
+
+button.sm { padding:8px 10px; font-size:12px; min-width:auto; }
+
+/* ===== params 페이지: Notes 적당히(2~3줄) ===== */
+body[data-page="params"] #robotNotes{
+  min-height: 78px;
+  height: 78px;
+  resize: none;        /* 늘리고 싶으면 이 줄 삭제 */
+}
+

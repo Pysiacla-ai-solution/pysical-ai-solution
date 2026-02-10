@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>파라미터 가이드 - Isaac RL RAG Assistant</title>
+  <link rel="stylesheet" href="/static/style.css?v=1001"/>
+  <script src="/static/app.js?v=1001" defer></script>
+  <style>
+    /* CSS는 위와 동일하므로 높이 및 버튼 최적화 코드 적용됨 */
+    :root { --bg-color: #0b0e11; --panel-bg: #16191e; --accent-primary: #6366f1; --accent-hover: #4f46e5; --text-main: #f3f4f6; --text-muted: #94a3b8; --border-color: #262b33; --input-bg: #1e2229; }
+    body { background-color: var(--bg-color); color: var(--text-main); font-family: 'Inter', sans-serif; margin: 0; overflow: hidden; }
+    .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+    .topbar { display: flex; justify-content: space-between; align-items: center; padding-bottom: 16px; border-bottom: 1px solid var(--border-color); margin-bottom: 20px; }
+    .brand h1 { font-size: 1.1rem; margin: 0; font-weight: 700; }
+    .brand p { font-size: 0.75rem; color: var(--text-muted); margin: 0; }
+    .nav a { color: var(--text-muted); text-decoration: none; margin-left: 16px; font-size: 0.85rem; }
+    .nav a.active { color: var(--accent-primary); font-weight: 600; }
+    .grid { display: grid; grid-template-columns: 320px 1fr; gap: 20px; align-items: start; }
+    .panel { background: var(--panel-bg); border: 1px solid var(--border-color); border-radius: 12px; padding: 20px; }
+    .panel h2 { font-size: 0.95rem; margin: 0 0 12px; color: var(--accent-primary); }
+    .help { font-size: 0.8rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 16px; }
+    .hint { color: #818cf8; font-weight: 500; display: block; margin-top: 4px; }
+    .robotInfoTitle { font-size: 0.85rem; font-weight: 700; margin: 12px 0; color: #cbd5e1; border-top: 1px solid var(--border-color); padding-top: 12px; }
+    .field { margin-bottom: 12px; }
+    .field label { display: block; font-size: 0.75rem; color: var(--text-muted); margin-bottom: 4px; }
+    .field input, .field textarea { width: 100%; background: var(--input-bg); border: 1px solid var(--border-color); border-radius: 6px; padding: 8px; color: white; font-size: 0.85rem; box-sizing: border-box; }
+    .field textarea { height: 70px; resize: none; }
+    .btnrow { display: flex; gap: 8px; margin-top: 10px; }
+    button { cursor: pointer; border-radius: 6px; font-size: 0.8rem; font-weight: 600; transition: 0.2s; padding: 8px 16px; border: 1px solid var(--border-color); }
+    button.secondary { background: transparent; color: var(--text-muted); }
+    button.secondary:hover { background: #262b33; color: white; }
+    .chat { background: var(--panel-bg); border: 1px solid var(--border-color); border-radius: 12px; display: flex; flex-direction: column; height: 600px; }
+    .chatHeader { padding: 12px 16px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; font-size: 0.9rem; font-weight: 600; }
+    .messages { flex: 1; padding: 16px; overflow-y: auto; display: flex; flex-direction: column; gap: 14px; }
+    .code { background: #0b0e11; border: 1px solid var(--border-color); border-radius: 8px; padding: 14px; font-family: 'Fira Code', monospace; font-size: 0.85rem; color: #e2e8f0; white-space: pre-wrap; }
+    .meta { font-size: 0.7rem; color: var(--text-muted); margin-top: 4px; text-align: right; }
+    .composer { padding: 12px; border-top: 1px solid var(--border-color); display: flex; gap: 10px; align-items: flex-end; }
+    .composer textarea { flex: 1; height: 54px; background: var(--input-bg); border: 1px solid var(--border-color); border-radius: 8px; padding: 10px; color: white; resize: none; font-size: 0.9rem; box-sizing: border-box; }
+    #sendBtn { background: var(--accent-primary); color: white; border: none; height: 54px; min-width: 90px; border-radius: 8px; font-weight: 600; flex-shrink: 0; }
+  </style>
+</head>
+
+<body data-mode="template">
+  <div class="container">
+    <div class="topbar">
+      <div class="brand">
+        <div class="logo"></div>
+        <div>
+          <h1>파라미터 가이드</h1>
+          <p>성공 사례 기반 “시작 범위” 추천</p>
+        </div>
+      </div>
+      <div class="nav">
+        <a href="/index.html">HOME</a>
+        <a href="/standard.html">규격 추천</a>
+        <a class="active" href="/parameter.html">파라미터 가이드</a>
+        <a href="/template.html">템플릿 생성</a>
+      </div>
+    </div>
+
+    <div class="grid">
+      <div class="panel">
+        <h2>질문 예시</h2>
+        <div class="help">
+          예) “Humanoid Locomotion인데 시작 파라미터 범위 추천해줘”<br/>
+          <span class="hint">결과: Kp · torque · scaling 시작 범위</span>
+        </div>
+        <div class="robotInfo">
+          <div class="robotInfoTitle">로봇 정보(선택)</div>
+          <div class="field">
+            <label>Robot Type</label>
+            <input id="robotType" placeholder="예: humanoid / quadruped"/>
+          </div>
+          <div class="field">
+            <label>Mass (kg)</label>
+            <input id="robotMass" placeholder="예: 60"/>
+          </div>
+          <div class="field">
+            <label>DoF</label>
+            <input id="robotDof" placeholder="예: 28"/>
+          </div>
+          <div class="field">
+            <label>추가 조건</label>
+            <textarea id="robotNotes" placeholder="예: 넘어지지 않게 / 에너지 효율 / 미끄러운 바닥"></textarea>
+          </div>
+          <div class="btnrow">
+            <button class="secondary" id="saveProfileBtn">프로필 저장</button>
+            <button class="secondary" id="clearProfileBtn">프로필 초기화</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="chat">
+        <div class="chatHeader">
+          <div>파라미터 가이드 챗</div>
+          <div class="chatActions">
+            <button class="sm secondary" style="font-size:0.7rem; padding:4px 8px;" id="clearChatBtn">대화 초기화</button>
+          </div>
+        </div>
+        <div class="messages">
+          <div class="msg assistant">
+            <div class="code" style="margin-top:0">(데모) Humanoid Locomotion 시작값 예시
+
+- Kp (stiffness): 20 ~ 50
+- torque limit: ~ 200 Nm
+- action scaling: 0.5 (처음엔 낮게)</div>
+            <div class="meta">샘플 출력(형식 예시)</div>
+          </div>
+        </div>
+        <div class="composer">
+          <textarea id="query" placeholder="예: humanoid locomotion 시작 Kp/torque/action scaling 범위 추천해줘"></textarea>
+          <button id="sendBtn">가이드 받기</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,145 @@
+<style>
+  :root {
+    --bg-color: #0f1115;
+    --panel-bg: #1a1d23;
+    --accent-color: #6366f1;
+    --accent-hover: #4f46e5;
+    --text-main: #f3f4f6;
+    --text-muted: #9ca3af;
+    --border-color: #2d3139;
+  }
+
+  body {
+    background-color: var(--bg-color);
+    color: var(--text-main);
+    font-family: 'Inter', -apple-system, sans-serif;
+    margin: 0;
+  }
+
+  .container { max-width: 1000px; margin: 0 auto; padding: 24px 20px; }
+
+  /* 헤더 섹션 슬림화 */
+  .topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border-color);
+  }
+  .brand h1 { font-size: 1.2rem; margin: 0; font-weight: 700; letter-spacing: -0.5px; }
+  .brand p { font-size: 0.8rem; color: var(--text-muted); margin: 2px 0 0; }
+
+  .nav a {
+    color: var(--text-muted);
+    text-decoration: none;
+    margin-left: 16px;
+    font-size: 0.85rem;
+    font-weight: 500;
+  }
+  .nav a.active { color: var(--accent-color); }
+
+  /* HERO 섹션 축소 (슬림 배너 스타일) */
+  .home-hero {
+    background: linear-gradient(90deg, #1e1b4b 0%, #1a1d23 100%);
+    padding: 20px 24px;
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+    margin-bottom: 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .home-hero-text h2 { margin: 0; font-size: 1.1rem; }
+  .home-hero-text p { margin: 4px 0 0; font-size: 0.85rem; color: var(--text-muted); }
+
+  /* 카드 그리드 */
+  .home-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+  }
+
+  .home-card {
+    background: var(--panel-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 20px;
+    transition: all 0.2s ease;
+  }
+  .home-card:hover {
+    border-color: var(--accent-color);
+    background: #20242b;
+  }
+
+  .home-card h3 { font-size: 1rem; margin: 0 0 10px 0; display: flex; align-items: center; gap: 8px; }
+  .home-card p { font-size: 0.85rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 16px; min-height: 40px; }
+
+  /* 버튼 슬림화 */
+  button {
+    background: #2d3139;
+    color: var(--text-main);
+    border: 1px solid var(--border-color);
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    width: 100%;
+    transition: 0.2s;
+  }
+  button:hover {
+    background: var(--accent-color);
+    border-color: var(--accent-color);
+    color: white;
+  }
+
+  @media (max-width: 768px) {
+    .home-grid { grid-template-columns: 1fr; }
+    .home-hero { flex-direction: column; align-items: flex-start; gap: 10px; }
+  }
+</style>
+
+<body data-page="home">
+  <div class="container">
+    <header class="topbar">
+      <div class="brand">
+        <h1>Isaac Sim Assistant</h1>
+        <p>Integrated Research Workflow</p>
+      </div>
+      <nav class="nav">
+        <a class="active" href="/home.html">HOME</a>
+        <a href="/env.html">환경 세팅</a>
+        <a href="/gpu.html">GPU</a>
+        <a href="/dashboard.html">대시보드</a>
+      </nav>
+    </header>
+
+    <section class="home-hero">
+      <div class="home-hero-text">
+        <h2>원하는 작업을 선택하세요</h2>
+        <p>Isaac Lab 세팅부터 자원 관리까지 효율적인 워크플로우를 제공합니다.</p>
+      </div>
+    </section>
+
+    <main class="home-grid">
+      <div class="home-card">
+        <h3>🛠 환경 세팅</h3>
+        <p>RL 세팅 초안 생성 및 규격 파라미터 템플릿을 관리합니다.</p>
+        <button onclick="location.href='/env.html'">이동하기</button>
+      </div>
+
+      <div class="home-card">
+        <h3>⚡ GPU 스케줄링</h3>
+        <p>서버 자원 예약 및 실시간 할당 상태를 모니터링합니다.</p>
+        <button onclick="location.href='/gpu.html'">이동하기</button>
+      </div>
+
+      <div class="home-card">
+        <h3>📊 대시보드</h3>
+        <p>실험 실행 이력과 추천 파라미터 결과를 확인합니다.</p>
+        <button onclick="location.href='/dashboard.html'">이동하기</button>
+      </div>
+    </main>
+  </div>
+</body>

@@ -1,0 +1,21 @@
+# docker compose -f docker-compose.yml up -d --build : 이미지를 빌드 후 컨테이너 실행 (기존 이미지는 미사용 시 별도 삭제 필요)
+# docker-compose -f docker-compose.yml up -d : 이미지가 없으면 빌드 후 컨테이너를 실행하고, 이미지가 있으면 빌드 없이 바로 컨테이너 실행
+# "로컬 환경(PC) 도커데스크탑" 또는 "서버 환경(리눅스) 도커데몬"이 설치/구성되어 있지 않다면, 직접 로컬에서 uviconrn으로 main을 실행
+
+# version: "3.9"
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8008:8008"
+    volumes:
+      - dockervenv:/app/.venv
+      - .:/app # 로컬 프로젝트 디렉토리를 컨테이너 '/app'로 마운트
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+
+volumes:
+  dockervenv:
