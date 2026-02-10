@@ -13,7 +13,7 @@
     
     ```sql
     source fast-rag-out/bin/activate
-    cd **workplace
+    cd workplace
     ./gradlew build
     ./gradlew :app:run 
     
@@ -233,6 +233,7 @@ git merge origin/main
   → 기능이 겹치면 파일 충돌이 늘어나니까 “영역” 나누면 좋음
 
 ---
+
 
 
 
