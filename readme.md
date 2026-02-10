@@ -25,7 +25,7 @@
     
     ```sql
     source fast-rag-out/bin/activate    #voice-ai-code/requirements.txt을 통해서 버전 다시맞춰야함
-    cd voice-ai-code
+    cd pysical-ai-solution/
     uvicorn app.main:app --host 0.0.0.0 --port 8008
     
     --port 8008로 접근 가능 
@@ -233,6 +233,7 @@ git merge origin/main
   → 기능이 겹치면 파일 충돌이 늘어나니까 “영역” 나누면 좋음
 
 ---
+
 
 
 
