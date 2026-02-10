@@ -92,10 +92,8 @@ voice-ai-code/external/        //RAG에 넣을 자료들을 모아둔다.
 ```
 
 —> 즉 ingest_isaaclab_repo.py를 활용해 백터디비 저장후
-
 —> assistant_service.py에서 RAG검색을 한다. 
 
-(이부분은 도익님 코드로 변경 필요)
 
 
 
