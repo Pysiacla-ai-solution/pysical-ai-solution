@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <title>GPU 스케줄러 - SLURM Style</title>
+  <link rel="stylesheet" href="/static/gpu.css" />
+  <style>
+    /* 큐 시스템에 맞는 추가 스타일 */
+    .metric-card {
+      background: #f8f9fa;
+      border: 1px solid #dee2e6;
+      border-radius: 6px;
+      padding: 10px;
+      margin-bottom: 15px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .status-badge {
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 0.8rem;
+      font-weight: bold;
+    }
+    .status-running { background: #e6fcf5; color: #0ca678; }
+    .status-queued { background: #fff9db; color: #f59f00; }
+    .status-completed { background: #f1f3f5; color: #868e96; }
+    .status-failed { background: #fff5f5; color: #fa5252; }
+    
+    .prio-score { font-family: monospace; font-weight: bold; color: #495057; }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <header class="header">
+      <div class="logo">🚀 GPU Job Scheduler</div>
+      <nav class="nav">
+        <a href="#" class="nav-item">HOME</a>
+        <a href="#" class="nav-item active">GPU Queue</a>
+        <a href="/docs" class="nav-item">API Docs</a>
+      </nav>
+    </header>
+
+    <main class="content">
+      <section class="panel panel-left">
+        <h2>🐍 작업 등록하기 </h2>
+        <form id="jobForm">
+          
+          <div class="field">
+            <label>파이썬 스크립트 (*.py)</label>
+            <input type="file" id="fileInput" accept=".py" required />
+          </div>
+
+          <div class="field">
+            <label>사용자자 ID</label>
+            <input type="text" id="userId" placeholder="예: intern_01, lead_dev" required />
+            <p class="hint"> ! 동일 ID로 많이 등록록할수록 우선순위가 낮아집니다 !</p>
+          </div>
+
+          <div class="field">
+            <label>필요 VRAM (GB)</label>
+            <input type="number" id="vramInput" value="2" min="1" max="80" />
+          </div>
+
+          <div class="field">
+            <label>구분 (Partition)</label>
+            <select id="partitionSelect">
+              <option value="normal" selected>Normal (기본)</option>
+              <option value="debug">Debug (높은 우선순위, 긴급)</option>
+              <option value="batch">Batch (낮은 우선순위, 대량)</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label>서비스 등급 (QOS)</label>
+            <select id="qosSelect">
+              <option value="standard" selected>Standard (표준)</option>
+              <option value="premium">Premium (가점 부여)</option>
+              <option value="admin">Admin (관리자 전용)</option>
+              <option value="guest">Guest (최하위)</option>
+            </select>
+          </div>
+
+          <button type="submit" id="submitBtn" class="primary-btn">작업 큐에 등록하기</button>
+        </form>
+        <div id="submitResult" style="margin-top: 10px; font-size: 0.9rem;"></div>
+      </section>
+
+      <section class="panel panel-right">
+        
+        <div class="panel-header">
+          <h2>📊 GPU 상태</h2>
+          <button id="refreshBtn" class="ghost-btn">새로고침</button>
+        </div>
+        <div id="gpuMetricsArea">
+          <div class="metric-card">로딩 중...</div>
+        </div>
+
+        <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
+
+        <div class="panel-header">
+          <h2>📋 작업 대기열 (Job Queue)</h2>
+        </div>
+        <table class="table" id="jobsTable">
+          <thead>
+            <tr>
+              <th width="10%">상태</th>
+              <th width="15%">점수(Priority)</th>
+              <th>User</th>
+              <th>Partition</th>
+              <th>VRAM</th>
+              <th>Job ID</th>
+            </tr>
+          </thead>
+          <tbody id="jobsTableBody">
+            </tbody>
+        </table>
+      </section>
+    </main>
+  </div>
+
+  <script src="/static/gpu.js"></script>
+</body>
+</html>
