@@ -1,0 +1,107 @@
+#!/usr/bin/env python3
+"""
+Mock sbatch command for SLURM job submission
+Usage: sbatch [--job-name=NAME] [--qos=QOS] SCRIPT
+"""
+
+import sys
+import json
+import os
+from datetime import datetime
+from pathlib import Path
+
+JOBS_DIR = Path("/slurm/jobs")
+COUNTER_FILE = JOBS_DIR / ".counter"
+
+def get_next_job_id():
+    """Generate next job ID"""
+    JOBS_DIR.mkdir(parents=True, exist_ok=True)
+    
+    if COUNTER_FILE.exists():
+        with open(COUNTER_FILE, 'r') as f:
+            counter = int(f.read().strip())
+    else:
+        counter = 1000
+    
+    next_id = counter + 1
+    with open(COUNTER_FILE, 'w') as f:
+        f.write(str(next_id))
+    
+    return next_id
+
+def parse_args(args):
+    """Parse sbatch arguments"""
+    job_name = "job"
+    qos = "standard"
+    user = "unknown"
+    gpus = 1
+    partition = "normal"
+    vram = 2
+    script = ""
+    
+    for arg in args:
+        if arg.startswith("--job-name="):
+            job_name = arg.split("=", 1)[1]
+        elif arg.startswith("--qos="):
+            qos = arg.split("=", 1)[1]
+        elif arg.startswith("--user="):
+            user = arg.split("=", 1)[1]
+        elif arg.startswith("--gpus="):
+            try:
+                gpus = int(arg.split("=", 1)[1])
+            except ValueError:
+                gpus = 1
+        elif arg.startswith("--partition="):
+            partition = arg.split("=", 1)[1]
+        elif arg.startswith("--comment="):
+            # Parse vram from comment like "vram:8"
+            comment = arg.split("=", 1)[1]
+            if comment.startswith("vram:"):
+                try:
+                    vram = int(comment.split(":")[1])
+                except ValueError:
+                    vram = 2
+        elif not arg.startswith("--"):
+            script = arg
+    
+    return job_name, qos, user, gpus, partition, vram, script
+
+def main():
+    args = sys.argv[1:]
+    
+    if not args:
+        print("sbatch: error: no script specified", file=sys.stderr)
+        sys.exit(1)
+    
+    job_name, qos, user, gpus, partition, vram, script = parse_args(args)
+    job_id = get_next_job_id()
+    
+    # Create job record
+    job_data = {
+        "job_id": str(job_id),
+        "job_name": job_name,
+        "status": "PENDING",
+        "qos": qos,
+        "user": user,
+        "gpu_count": gpus,
+        "partition": partition,
+        "vram_gb": vram,
+        "priority_score": 0.0,
+        "script": script,
+        "submitted_at": datetime.utcnow().isoformat() + "Z",
+        "started_at": None,
+        "completed_at": None
+    }
+    
+    # Save job to file
+    job_file = JOBS_DIR / f"{job_id}.json"
+    with open(job_file, 'w') as f:
+        json.dump(job_data, f, indent=2)
+    
+    # Output job ID (matching real SLURM behavior)
+    print(f"Submitted batch job {job_id}")
+    
+    return 0
+
+if __name__ == "__main__":
+    sys.exit(main())

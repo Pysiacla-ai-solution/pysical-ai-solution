@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GPU Job Scheduler</title>
+  <style>
+    :root {
+      --bg-dark: #1e1e2e;
+      --panel-bg: #2b2b40;
+      --text-white: #ffffff;
+      --text-gray: #a0a0b0;
+      --accent: #7c3aed;
+      --accent-hover: #6d28d9;
+      --danger: #ef4444;
+      --success: #22c55e;
+      --border: #3f3f55;
+    }
+
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: #13131f;
+      color: var(--text-white);
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* Navbar */
+    .navbar {
+      background-color: var(--bg-dark);
+      padding: 0 24px;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text-white);
+    }
+
+    .brand span {
+      font-size: 24px;
+    }
+
+    /* Rocket Icon placeholder */
+    .nav-links {
+      display: flex;
+      gap: 20px;
+    }
+
+    .nav-links a {
+      text-decoration: none;
+      color: var(--text-gray);
+      font-size: 14px;
+      padding: 8px 12px;
+      border-radius: 6px;
+      transition: all 0.2s;
+    }
+
+    .nav-links a:hover,
+    .nav-links a.active {
+      color: var(--text-white);
+      background-color: rgba(255, 255, 255, 0.05);
+    }
+
+    .nav-links a.btn-cta {
+      background-color: rgba(124, 58, 237, 0.2);
+      color: #c4b5fd;
+      border: 1px solid var(--accent);
+    }
+
+    /* Main Grid */
+    .main-container {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 350px 1fr;
+      gap: 24px;
+      padding: 24px;
+      overflow: hidden;
+    }
+
+    /* Panels */
+    .panel {
+      background-color: var(--bg-dark);
+      border-radius: 16px;
+      padding: 24px;
+      border: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+    }
+
+    h2 {
+      margin: 0 0 20px 0;
+      font-size: 18px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    /* Form Elements */
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    label {
+      display: block;
+      font-size: 13px;
+      color: var(--text-gray);
+      margin-bottom: 8px;
+    }
+
+    input[type="text"],
+    input[type="number"],
+    select,
+    textarea {
+      width: 100%;
+      background-color: #13131f;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px;
+      color: var(--text-white);
+      font-size: 14px;
+      box-sizing: border-box;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    input:focus,
+    select:focus,
+    textarea:focus {
+      border-color: var(--accent);
+    }
+
+    .file-input-wrapper {
+      position: relative;
+      display: flex;
+      gap: 8px;
+    }
+
+    .small-text {
+      font-size: 12px;
+      color: #6b7280;
+      margin-top: 4px;
+    }
+
+    button.primary {
+      width: 100%;
+      background-color: var(--accent);
+      color: white;
+      border: none;
+      padding: 14px;
+      border-radius: 8px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    button.primary:hover {
+      background-color: var(--accent-hover);
+    }
+
+    /* Status Panel */
+    .gpu-status-card {
+      background-color: rgba(255, 255, 255, 0.03);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 24px;
+      border: 1px solid var(--border);
+    }
+
+    .gpu-bar-bg {
+      background: rgba(255, 255, 255, 0.1);
+      height: 8px;
+      border-radius: 4px;
+      margin-top: 8px;
+      overflow: hidden;
+    }
+
+    .gpu-bar-fill {
+      height: 100%;
+      background: var(--accent);
+      width: 0%;
+      /* Dynamic */
+      transition: width 0.5s;
+    }
+
+    /* Table */
+    .queue-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+    }
+
+    .queue-table th {
+      text-align: left;
+      padding: 12px;
+      color: var(--text-gray);
+      font-weight: 500;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .queue-table td {
+      padding: 12px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .status-badge {
+      display: inline-block;
+      padding: 4px 8px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+
+    .status-Completed {
+      background: rgba(34, 197, 94, 0.2);
+      color: #4ade80;
+    }
+
+    .status-Running {
+      background: rgba(59, 130, 246, 0.2);
+      color: #60a5fa;
+    }
+
+    .status-Pending {
+      background: rgba(234, 179, 8, 0.2);
+      color: #facc15;
+    }
+
+    .refresh-btn {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text-gray);
+      padding: 4px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 12px;
+    }
+
+    .refresh-btn:hover {
+      background: rgba(255, 255, 255, 0.05);
+      color: white;
+    }
+  </style>
+</head>
+
+<body data-page="gpu">
+
+  <!-- Top Navigation -->
+  <nav class="navbar">
+    <div class="brand">
+      <span>🚀</span> GPU Job Scheduler
+    </div>
+    <div class="nav-links">
+      <a href="/index.html">HOME</a>
+      <a href="/env.html">환경 세팅</a>
+      <a href="/gpu.html" class="active btn-cta">GPU Queue</a>
+      <a href="/dashboard.html">API Docs</a>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <div class="main-container">
+
+    <!-- Left Panel: Submission Form -->
+    <div class="panel">
+      <h2>🌀 작업 등록하기</h2>
+
+      <div class="form-group">
+        <label>Job Name</label>
+        <input type="text" id="jobName" placeholder="예: training_run_01" required>
+      </div>
+
+      <div class="form-group">
+        <label>파이썬 스크립트 (*.py)</label>
+        <!-- Mock File Input styling -->
+        <div class="file-input-wrapper">
+          <input type="text" id="jobScript" placeholder="스크립트 내용 직접 입력 (임시)" style="display:none;">
+          <textarea id="jobScriptDisplay" rows="3" placeholder="print('Hello World')"></textarea>
+        </div>
+        <p class="small-text">실제 파일 업로드 대신 텍스트로 시뮬레이션 합니다.</p>
+      </div>
+
+      <div class="form-group">
+        <label>필요 VRAM (GB)</label>
+        <input type="number" id="vramInput" value="2" min="1" max="80">
+      </div>
+
+      <div class="form-group">
+        <label>구분 (Partition)</label>
+        <select id="partitionSelect">
+          <option value="normal">Normal (기본)</option>
+          <option value="debug">Debug (빠른 테스트)</option>
+          <option value="batch">Batch (장기 작업)</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>서비스 등급 (QOS)</label>
+        <select id="qosSelect">
+          <option value="standard">Standard (표준)</option>
+          <option value="high">High (우선순위 높음)</option>
+          <option value="hil">HIL (Hardware-in-Loop)</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <p class="small-text">! 동일 ID로 많이 등록할수록 우선순위가 낮아집니다 (FairShare)</p>
+      </div>
+
+      <button class="primary" id="submitJobBtn">작업 큐에 등록하기</button>
+      <div id="submitStatus" style="margin-top:10px; font-size:13px; text-align:center;"></div>
+    </div>
+
+    <!-- Right Panel: Status & Queue -->
+    <div class="panel">
+
+      <!-- GPU Status Card -->
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+        <h2>📊 GPU 상태</h2>
+        <button class="refresh-btn" id="refreshBtn">새로고침</button>
+      </div>
+
+      <div class="gpu-status-card">
+        <div style="display:flex; justify-content:space-between; font-weight:600;">
+          <span style="color:#60a5fa;">virtual-gpu-0</span>
+          <span style="font-size:13px; color:var(--text-gray);">MEM: <span id="memUsage">0.0</span> / 16.0 GB</span>
+        </div>
+        <div style="font-size:12px; color:var(--text-gray); margin-top:4px;">GPU ID: 0</div>
+        <div class="gpu-bar-bg">
+          <div class="gpu-bar-fill" id="gpuMemBar" style="width: 0%;"></div>
+        </div>
+      </div>
+
+      <!-- Job Queue Table -->
+      <h2 style="margin-top:10px;">📋 작업 대기열 (Job Queue)</h2>
+
+      <table class="queue-table">
+        <thead>
+          <tr>
+            <th width="100">상태</th>
+            <th>Name</th>
+            <th>점수 (Prio)</th>
+            <th>User</th>
+            <th>Partition</th>
+            <th>VRAM</th>
+            <th>Job ID</th>
+          </tr>
+        </thead>
+        <tbody id="jobQueueBody">
+          <!-- JS Injected -->
+          <tr>
+            <td colspan="7" style="text-align:center; padding:30px;">Loading...</td>
+          </tr>
+        </tbody>
+      </table>
+
+    </div>
+  </div>
+
+  <script>
+    let pollInterval = null;
+
+    // Utility
+    function escapeHtml(s) {
+      return (s ?? "").replace(/[&<>"']/g, (m) => ({
+        "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;"
+      }[m]));
+    }
+
+    // API Calls
+    async function submitJob(data) {
+      const res = await fetch("/api/gpu/jobs", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data)
+      });
+      if (!res.ok) {
+        const text = await res.text();
+        throw new Error(text);
+      }
+      return await res.json();
+    }
+
+    async function getJobs() {
+      const res = await fetch("/api/gpu/jobs");
+      if (!res.ok) throw new Error("Failed to fetch jobs");
+      return await res.json();
+    }
+
+    // Render Logic
+    function renderQueue(jobs) {
+      const tbody = document.getElementById("jobQueueBody");
+      if (jobs.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:30px; color:var(--text-gray);">대기 중인 작업이 없습니다.</td></tr>`;
+        return;
+      }
+
+      // Running jobs first, then sorted by Priority
+      // (Backend already sorts, but verify just in case if needed)
+
+      let html = "";
+      let totalVram = 0;
+
+      jobs.forEach(job => {
+        const score = (job.priority_score || 0).toFixed(0); // Integer look
+        const statusClass = `status-${job.status === 'RUNNING' ? 'Running' : (job.status === 'COMPLETED' ? 'Completed' : 'Pending')}`;
+
+        // Calc total VRAM usage for running jobs
+        if (job.status === 'RUNNING') {
+          totalVram += (job.gpu_count * 2); // Assuming 1 unit = 2GB for demo
+        }
+
+        html += `
+            <tr>
+                <td><span class="status-badge ${statusClass}">${job.status}</span></td>
+                <td style="font-weight:600; color:var(--text-white);">${escapeHtml(job.job_name)}</td>
+                <td style="font-weight:bold; color:var(--accent);">${Number(score).toLocaleString()}</td>
+                <td>${escapeHtml(job.user || 'gUEST')}</td>
+                <td style="color:var(--text-gray); font-size:13px;">${escapeHtml(job.partition || 'normal')} / ${escapeHtml(job.qos || 'std')}</td>
+                <td>${job.gpu_count || 1}.0 GB</td>
+                <td style="font-family:monospace; color:var(--text-gray);">${job.job_id}</td>
+            </tr>
+            `;
+      });
+      tbody.innerHTML = html;
+
+      // Update GPU Bar
+      const maxMem = 16;
+      const used = Math.min(totalVram, maxMem);
+      const pct = (used / maxMem) * 100;
+      document.getElementById("memUsage").textContent = used.toFixed(1);
+      document.getElementById("gpuMemBar").style.width = `${pct}%`;
+    }
+
+    async function poll() {
+      try {
+        const jobs = await getJobs();
+        renderQueue(jobs);
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    // Event Listeners
+    document.getElementById("submitJobBtn").addEventListener("click", async () => {
+      const btn = document.getElementById("submitJobBtn");
+      const status = document.getElementById("submitStatus");
+
+      const jobName = document.getElementById("jobName").value;
+      const script = document.getElementById("jobScriptDisplay").value;
+      const vram = parseInt(document.getElementById("vramInput").value) || 2;
+      const partition = document.getElementById("partitionSelect").value;
+      const qos = document.getElementById("qosSelect").value;
+
+      if (!jobName || !script) {
+        status.innerHTML = `<span style="color:var(--danger)">이름과 스크립트를 입력해주세요.</span>`;
+        return;
+      }
+
+      btn.disabled = true;
+      btn.textContent = "등록 중...";
+
+      try {
+        await submitJob({
+          job_name: jobName,
+          script: script,
+          vram_gb: vram,        // Backend expects this
+          partition: partition, // Backend expects this
+          qos: qos
+        });
+        status.innerHTML = `<span style="color:var(--success)">✅ 작업이 등록되었습니다!</span>`;
+        document.getElementById("jobName").value = "";
+        document.getElementById("jobScriptDisplay").value = "";
+        poll();
+      } catch (e) {
+        status.innerHTML = `<span style="color:var(--danger)">❌ 실패: ${e.message}</span>`;
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "작업 큐에 등록하기";
+      }
+    });
+
+    document.getElementById("refreshBtn").addEventListener("click", poll);
+
+    // Init
+    poll();
+    setInterval(poll, 2000);
+
+  </script>
+</body>
+
+</html>

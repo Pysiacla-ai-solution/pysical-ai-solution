@@ -8,8 +8,15 @@
     docker compose -p maria_db -f maria_db.yaml up -d 
     -- port 3079로 접근 가능 
     ```
-    
-2. login page (인증 서버) running 
+2. Slurm Mock 컨테이너 실행
+  '''
+  /pysical-ai-solution/docker/slurm-mock
+  docker build -t slurm-mock . 
+docker rm -f slurm-mock
+docker run -d --name slurm-mock slurm-mock    
+'''
+
+3. login page (인증 서버) running 
     
     ```sql
     source fast-rag-out/bin/activate
@@ -21,7 +28,7 @@
     -- port 8080으로 접근 가능** 
     ```
     
-3. front/back running
+4. front/back running
     
     ```sql
     source fast-rag-out/bin/activate    #voice-ai-code/requirements.txt을 통해서 버전 다시맞춰야함
@@ -32,7 +39,7 @@
     ```
     
 
-1. 백터 디비 생성 (이미 생성해서 pass)
+5. 백터 디비 생성 (이미 생성해서 pass)
     
     ```sql
     cd voice-ai-code 
@@ -40,7 +47,7 @@
     ```
     
 
-1. 로그인으로 인증 후 웹 접속 
+6. 로그인으로 인증 후 웹 접속 
     
     ```sql
     http://localhost:8080/ 

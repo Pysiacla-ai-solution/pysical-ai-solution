@@ -14,8 +14,20 @@ services:
     volumes:
       - dockervenv:/app/.venv
       - .:/app # 로컬 프로젝트 디렉토리를 컨테이너 '/app'로 마운트
+      - slurm-jobs:/slurm/jobs  # SLURM job storage 공유
     environment:
       - OPENAI_API_KEY=${OPENAI_API_KEY}
+    depends_on:
+      - slurm-mock
+
+  slurm-mock:
+    build:
+      context: ./docker/slurm-mock
+      dockerfile: Dockerfile
+    volumes:
+      - slurm-jobs:/slurm/jobs  # Job storage 공유 볼륨
+    container_name: slurm-mock
 
 volumes:
   dockervenv:
+  slurm-jobs:  # SLURM job 데이터 저장용 볼륨

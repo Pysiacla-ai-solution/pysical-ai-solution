@@ -17,6 +17,7 @@ from app.utils import vectorstore_state
 
 
 from app.routers.assistant_router import router as assistant_router
+from app.routers.gpu_router import router as gpu_router
 
 from pathlib import Path
 
@@ -48,6 +49,7 @@ STANDARD_HTML     = STATIC_DIR / "standard.html"
 PARAMETER_HTML     = STATIC_DIR / "parameter.html"
 TEMPLATE_HTML = STATIC_DIR / "template.html"
 ENV_HTML = STATIC_DIR / "env.html"
+GPU_HTML = STATIC_DIR / "gpu.html"
 
 STATIC_DIR.mkdir(parents=True, exist_ok=True)
 
@@ -61,16 +63,16 @@ app = FastAPI()
 def load_faiss_on_startup():
     faiss_dir = Path(__file__).resolve().parent / "data" / "faiss"
     if not faiss_dir.exists():
-        print("❌ FAISS 디렉토리가 없습니다.")
+        print("⚠️ FAISS index not found:", faiss_dir)
         return None
 
-    # 1) 임베딩 생성 시와 동일하게
+    # BGE 임베딩 — inject 코드와 동일한 설정
     model_name = "BAAI/bge-base-en-v1.5"
     encode_kwargs = {"normalize_embeddings": True}
 
     embeddings = HuggingFaceEmbeddings(
         model_name=model_name,
-        model_kwargs={"device": "cpu"},  # GPU 사용 시 'cuda'
+        model_kwargs={"device": "cpu"},
         encode_kwargs=encode_kwargs,
     )
 
@@ -80,21 +82,6 @@ def load_faiss_on_startup():
         allow_dangerous_deserialization=True,
     )
     print("✅ FAISS VectorStore (BGE-Base + Cosine) loaded")
-
-# def load_faiss_on_startup():
-#     faiss_dir = Path(__file__).resolve().parent / "data" / "faiss"
-#     if (faiss_dir / "index.faiss").exists():
-#         embeddings = OpenAIEmbeddings(
-#             openai_api_key=os.getenv("OPENAI_API_KEY")
-#         )
-#         vectorstore_state.VECTORSTORE = FAISS.load_local(
-#             str(faiss_dir),
-#             embeddings,
-#             allow_dangerous_deserialization=True,  # 로컬 신뢰 환경 OK
-#         )
-#         print("✅ FAISS loaded on startup:", faiss_dir)
-#     else:
-#         print("⚠️ FAISS index not found:", faiss_dir)
 
 #     faiss_dir = Path(__file__).resolve().parent / "data" / "faiss"
 #     if (faiss_dir / "index.faiss").exists():
@@ -188,6 +175,11 @@ async def env_page(current_user: dict = Depends(get_current_user)):
     _must_exist(ENV_HTML, "env.html")
     return FileResponse(ENV_HTML)
 
+@app.get("/gpu.html", include_in_schema=False)
+async def gpu_page(current_user: dict = Depends(get_current_user)):
+    _must_exist(GPU_HTML, "gpu.html")
+    return FileResponse(GPU_HTML)
+
 # 5) 정적 파일 마운트
 #    주의: StaticFiles(directory=STATIC_DIR)로 /static을 열면
 #       /static/index.html 로 "직접 접근"이 가능해집니다.
@@ -248,7 +240,8 @@ def favicon(current_user: dict = Depends(get_current_user)):
 # 8) 라우터 등록 (API도 JWT로 보호하려면 router 내부에서 Depends(get_current_user) 적용 권장)
 
 
-app.include_router(assistant_router,prefix="/api/assistant")
+app.include_router(assistant_router, prefix="/api/assistant")
+app.include_router(gpu_router, prefix="/api/gpu")
 
 
 
