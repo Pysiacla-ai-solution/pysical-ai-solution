@@ -39,7 +39,7 @@ docker run -d --name slurm-mock slurm-mock
     ```
     
 
-5. 백터 디비 생성 (이미 생성해서 pass)
+5. 백터 디비 생성 (이미 생성해서 pass) "TEST"
     
     ```sql
     cd voice-ai-code 
