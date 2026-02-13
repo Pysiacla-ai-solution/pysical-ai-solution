@@ -50,6 +50,7 @@ tiktoken==0.9.0
 
 huggingface-hub>=0.24.0
 transformers==4.41.2
+sentence-transformers==5.2.2
 packaging==23.2
 wheel<0.46
 

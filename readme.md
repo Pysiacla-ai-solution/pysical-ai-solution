@@ -11,7 +11,8 @@
 2. Slurm Mock 컨테이너 실행
   '''
   /pysical-ai-solution/docker/slurm-mock
-  docker build -t slurm-mock . 
+  
+docker build -t slurm-mock . 
 docker rm -f slurm-mock
 docker run -d --name slurm-mock slurm-mock    
 '''
